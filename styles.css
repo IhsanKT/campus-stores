@@ -1,14 +1,43 @@
+@font-face {
+  font-family: "Archivo";
+  src: url("./fonts/archivo-wdth-wght.woff2") format("woff2");
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Plex Mono";
+  src: url("./fonts/plex-mono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Plex Mono";
+  src: url("./fonts/plex-mono-500.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Plex Mono";
+  src: url("./fonts/plex-mono-600.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
 :root {
   color-scheme: light dark;
-  background: light-dark(#f0f2f1, #191e21);
+  background: light-dark(#e7e4da, #0d0d0c);
+}
+/* Theme switch: "auto" (no attribute) follows the device; these force one scheme. */
+:root[data-theme="light"],
+:root[data-theme="light"] #campus-stores {
+  color-scheme: light;
+}
+:root[data-theme="dark"],
+:root[data-theme="dark"] #campus-stores {
+  color-scheme: dark;
 }
 body {
   margin: 0;
-  padding: clamp(10px, 3vw, 44px) clamp(6px, 3vw, 36px);
-}
-body > main {
-  max-width: 1060px;
-  margin: 0 auto;
 }
 .icon-library {
   position: absolute;
@@ -23,31 +52,434 @@ body > main {
   stroke-linejoin: round;
 }
 
+/* Tokens: label stock, ink, one safety-yellow accent for "needs attention". */
 #campus-stores {
   color-scheme: light dark;
-  --ink: light-dark(#202c35, #ecf0f0);
-  --quiet: light-dark(#526370, #b9c5cb);
-  --paper: light-dark(#fff, #232a30);
-  --desk: light-dark(#f3f5f5, #1d2328);
-  --nav: light-dark(#eaf0f1, #29333b);
-  --sel: light-dark(#233e4c, #c5dce4);
-  --inv: light-dark(#fff, #172b34);
-  --line: light-dark(#d2dcdf, #475158);
-  --memo: light-dark(#fff3d8, #3d3426);
-  --memotxt: light-dark(#65491e, #ead4a5);
-  --mark: light-dark(#bd502f, #f2a585);
-  --ok: light-dark(#e3f1e8, #2d4838);
-  --oktxt: light-dark(#25523d, #bedac8);
+  --ink: light-dark(#141413, #efece3);
+  --quiet: light-dark(#5d5a51, #a8a498);
+  --paper: light-dark(#f6f4ee, #171716);
+  --card: light-dark(#fffefb, #1f1f1d);
+  --line: light-dark(#d8d4c7, #36352f);
+  --yellow: #ffc31f;
+  --onyellow: #141413;
+  --bad: light-dark(#a8261b, #ff9c8f);
+  --badbg: light-dark(#fbe3df, #3b1c18);
+  --ok: light-dark(#1d6542, #93d8b0);
+  --okbg: light-dark(#e2f0e7, #17291f);
+  --mono: "Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --cond: "Archivo", "Arial Narrow", system-ui, sans-serif;
   background: var(--paper);
   color: var(--ink);
   font:
-    14px/1.48 "Inter",
-    "Arial",
+    14px/1.5 "Archivo",
+    system-ui,
     sans-serif;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
   container-type: inline-size;
+}
+#campus-stores .shell {
+  flex: 1;
+}
+#campus-stores .page > * {
+  max-width: 940px;
+}
+
+/* Shift handover panel */
+#campus-stores .handover {
+  border: 1.5px solid var(--ink);
+  border-top: 5px solid var(--yellow);
+  background: var(--card);
+  padding: 12px 14px;
+  margin-bottom: 18px;
+}
+#campus-stores .handover .sectionhead {
+  margin-bottom: 8px;
+}
+#campus-stores .handover h3 {
+  font: 800 18px/1.1 var(--cond);
+  font-stretch: 75%;
+  text-transform: uppercase;
+}
+#campus-stores .handover textarea {
+  width: 100%;
+  font: 13px/1.6 var(--mono);
+  margin: 6px 0 10px;
+}
+#campus-stores .checks {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+#campus-stores .check {
+  padding: 7px 10px;
+  border-radius: 2px;
+  font-size: 13px;
+  font-weight: 600;
+}
+#campus-stores .check.error {
+  background: var(--badbg);
+  color: var(--bad);
+  border-left: 3px solid var(--bad);
+}
+#campus-stores .check.warn {
+  background: color-mix(in srgb, var(--yellow) 22%, transparent);
+  border-left: 3px solid var(--yellow);
+}
+#campus-stores .check.ok {
+  background: var(--okbg);
+  color: var(--ok);
+  border-left: 3px solid var(--ok);
+  margin-bottom: 10px;
+}
+#campus-stores .aikey summary {
+  font: 600 12px var(--mono);
+  color: var(--quiet);
+  margin-top: 4px;
+}
+#campus-stores .aikey p {
+  margin: 8px 0;
+  font-size: 13px;
+}
+#campus-stores .aikey input {
+  flex: 1 1 220px;
+  font-family: var(--mono);
+}
+#campus-stores button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* Guided tour */
+#campus-stores .tourbtn {
+  background: var(--yellow);
+  color: var(--onyellow);
+  border-color: var(--onyellow);
+  font-size: 12px;
+  padding: 5px 10px;
+}
+#campus-stores .tour {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 10;
+  width: min(380px, calc(100vw - 32px));
+  background: #141413;
+  color: #f6f4ee;
+  border-left: 6px solid var(--yellow);
+  padding: 14px 16px 4px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+  animation: rise 180ms ease-out;
+}
+#campus-stores .tour small {
+  color: var(--yellow);
+  font: 600 11px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+#campus-stores .tour h3 {
+  font: 800 19px/1.15 var(--cond);
+  font-stretch: 75%;
+  text-transform: uppercase;
+  margin: 4px 0 6px;
+}
+#campus-stores .tour p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+#campus-stores .tour .kitactions {
+  padding: 12px 0;
+}
+#campus-stores .tour button {
+  background: transparent;
+  color: #f6f4ee;
+  border-color: #f6f4ee;
+}
+#campus-stores .tour .primary {
+  background: var(--yellow);
+  color: var(--onyellow);
+  border-color: var(--yellow);
+}
+#campus-stores .spot {
+  outline: 3px solid var(--yellow);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 7px var(--ink);
+  animation: spot 1.2s ease-out 2;
+}
+@keyframes spot {
+  50% {
+    outline-offset: 9px;
+  }
+}
+#campus-stores .shake {
+  border-color: var(--bad);
+  animation: shake 320ms ease-in-out;
+}
+@keyframes shake {
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+#campus-stores .stamp.fresh {
+  animation: stamp 380ms cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-7deg) scale(2.4);
+  }
+  60% {
+    opacity: 1;
+    transform: rotate(-7deg) scale(0.92);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #campus-stores .shake,
+  #campus-stores .stamp.fresh,
+  #campus-stores .spot,
+  #campus-stores .tour,
+  #campus-stores .answer {
+    animation: none;
+  }
+}
+@container (max-width: 650px) {
+  #campus-stores .tour {
+    right: 8px;
+    left: 8px;
+    bottom: 8px;
+    width: auto;
+  }
+}
+
+/* Ask the desk */
+#campus-stores .mast {
+  align-items: flex-start;
+}
+#campus-stores .ask {
+  flex: 1 1 360px;
+  max-width: 620px;
+  display: grid;
+  gap: 6px;
+}
+#campus-stores .ask label {
+  font: 600 10px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--quiet);
+}
+#campus-stores .askrow {
+  display: flex;
+  margin-top: 3px;
+}
+#campus-stores .askrow input {
+  flex: 1;
+  font-size: 15px;
+  padding: 9px 12px;
+  border-right: 0;
+}
+#campus-stores .askchips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+#campus-stores .chip,
+#campus-stores .src {
+  font: 500 11px/1.2 var(--mono);
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 4px 8px;
+  border-color: var(--line);
+  background: transparent;
+}
+#campus-stores .answer {
+  position: relative;
+  border: 1.5px solid var(--ink);
+  border-left: 5px solid var(--yellow);
+  background: var(--card);
+  padding: 10px 40px 10px 12px;
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+  animation: rise 160ms ease-out;
+}
+#campus-stores .answer > small {
+  font-family: var(--mono);
+}
+#campus-stores .answer.unsure {
+  border-left-color: var(--quiet);
+}
+#campus-stores .sources {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+}
+#campus-stores .src {
+  border-color: var(--ink);
+}
+#campus-stores .askx {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 10px;
+  padding: 3px 6px;
+  border-color: var(--line);
+  background: transparent;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* Message reader */
+#campus-stores .assist {
+  border: 1.5px dashed var(--ink);
+  background: var(--card);
+  padding: 10px 12px 12px;
+  margin-bottom: 14px;
+}
+#campus-stores .assisthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-bottom: 6px;
+}
+#campus-stores .assisthead b {
+  font: 800 14px var(--cond);
+  font-stretch: 75%;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+#campus-stores .assist textarea {
+  width: 100%;
+  font-size: 14px;
+}
+#campus-stores .evmsg {
+  font-size: 15px;
+  line-height: 1.9;
+  margin: 8px 0 4px;
+}
+#campus-stores mark.ev {
+  color: inherit;
+  padding: 1px 4px;
+  border-radius: 2px;
+  margin: 0 1px;
+}
+#campus-stores mark.ev.returned {
+  background: var(--okbg);
+  box-shadow: inset 0 -2px var(--ok);
+}
+#campus-stores mark.ev.out {
+  background: color-mix(in srgb, var(--yellow) 45%, transparent);
+  box-shadow: inset 0 -2px var(--yellow);
+}
+#campus-stores mark.ev.holder {
+  background: var(--ink);
+  color: var(--paper);
+}
+#campus-stores mark.ev.time {
+  background: transparent;
+  outline: 1.5px dashed var(--ink);
+  outline-offset: -1px;
+}
+#campus-stores .legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font: 11px var(--mono);
+  margin-bottom: 8px;
+}
+#campus-stores .proposal {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+#campus-stores .proposal b {
+  font: 600 11px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 6px;
+}
+
+/* Evaluation tab */
+#campus-stores .evalcard {
+  border: 1.5px solid var(--ink);
+  background: var(--card);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+#campus-stores .evalcard h3 {
+  font: 800 20px/1.1 var(--cond);
+  font-stretch: 75%;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+#campus-stores .stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+#campus-stores .stat {
+  border: 1.5px solid var(--ink);
+  padding: 10px 12px;
+  display: grid;
+}
+#campus-stores .stat b {
+  font: 600 30px/1.1 var(--mono);
+}
+#campus-stores .stat.ok b {
+  color: var(--ok);
+}
+#campus-stores .stat.warn {
+  border-color: var(--yellow);
+}
+#campus-stores .stat.bad b {
+  color: var(--bad);
+}
+#campus-stores .evalrows {
+  list-style: none;
+  padding: 0;
+}
+#campus-stores .evalrows li {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 8px 0;
+  border-top: 1px dashed var(--line);
+  font-size: 13px;
+}
+#campus-stores .evalrows .st {
+  justify-self: start;
+}
+#campus-stores .evalrows small {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+#campus-stores form[data-note] {
+  margin-top: 18px;
+}
+#campus-stores .carryhead .primary {
+  margin-left: auto;
 }
 #campus-stores * {
   box-sizing: border-box;
@@ -55,22 +487,22 @@ body > main {
 #campus-stores [hidden] {
   display: none !important;
 }
-#campus-stores h1,
-#campus-stores h2,
-#campus-stores h3,
-#campus-stores p {
+#campus-stores :is(h1, h2, h3, p, ul, fieldset) {
   margin: 0;
 }
+#campus-stores :is(h1, h2) {
+  font-family: var(--cond);
+  font-stretch: 72%;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
 #campus-stores h1 {
-  font:
-    600 clamp(24px, 4cqw, 33px)/1.13 "Archivo",
-    system-ui,
-    sans-serif;
-  letter-spacing: -0.05em;
+  font-size: clamp(26px, 4.4cqw, 40px);
 }
 #campus-stores h2 {
-  font-size: 20px;
-  letter-spacing: -0.03em;
+  font-size: 24px;
 }
 #campus-stores h3 {
   font-size: 15px;
@@ -82,125 +514,262 @@ body > main {
 #campus-stores small {
   font-size: 12px;
 }
+
+/* Exam strip + brief */
 #campus-stores .examstrip {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 4px 16px;
   flex-wrap: wrap;
-  background: var(--desk);
   border-bottom: 1px solid var(--line);
-  padding: 9px 18px;
+  padding: 8px 20px;
   color: var(--quiet);
-  font-size: 13px;
+  font: 500 11px/1.5 var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 #campus-stores details[open] {
   width: 100%;
 }
+#campus-stores .theme {
+  display: flex;
+  margin-left: auto;
+}
+#campus-stores .theme button {
+  font: 600 10px/1 var(--mono);
+  letter-spacing: 0.06em;
+  padding: 5px 8px;
+  background: transparent;
+  color: var(--quiet);
+  border-color: var(--line);
+}
+#campus-stores .theme button + button {
+  border-left: 0;
+}
+#campus-stores .theme button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
 #campus-stores summary {
-  font-weight: 650;
-  color: var(--sel);
+  font-weight: 600;
+  color: var(--ink);
   cursor: pointer;
 }
 #campus-stores .briefcopy {
   color: var(--ink);
-  max-width: 79ch;
-  padding: 12px 0 5px;
+  font: 14px/1.55 "Archivo", system-ui, sans-serif;
+  text-transform: none;
+  letter-spacing: 0;
+  max-width: 76ch;
+  padding: 12px 0 6px;
   display: grid;
   gap: 8px;
 }
+#campus-stores .briefcopy h2 {
+  font-size: 20px;
+}
+
+/* Masthead */
 #campus-stores .mast,
 #campus-stores .brandblock,
 #campus-stores .shift,
 #campus-stores .sectionhead,
 #campus-stores .statusbar,
-#campus-stores .buttons {
+#campus-stores .buttons,
+#campus-stores .kitactions {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 #campus-stores .mast {
-  padding: 17px 20px;
+  padding: 18px 20px;
   justify-content: space-between;
   flex-wrap: wrap;
 }
+#campus-stores .brandblock {
+  gap: 14px;
+}
 #campus-stores .brandmark {
-  background: var(--mark);
-  color: var(--inv);
-  width: 40px;
-  height: 40px;
+  background: var(--yellow);
+  color: var(--onyellow);
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
-  border-radius: 9px;
+  border: 2px solid var(--ink);
+  border-radius: 2px;
 }
 #campus-stores .brandmark svg {
-  width: 25px;
-  height: 25px;
+  width: 26px;
+  height: 26px;
+}
+#campus-stores .brandblock .muted {
+  font: 500 11px/1.6 var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
 }
 #campus-stores .clock {
   display: grid;
   text-align: right;
+  gap: 2px;
+}
+#campus-stores .clock small {
+  font: 500 10px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 #campus-stores .clock strong {
+  background: var(--onyellow);
+  color: var(--yellow);
+  font: 600 15px/1 var(--mono);
   font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 9px 12px;
+  border-radius: 2px;
 }
+
+/* Shift prompt: a black band, like the strip above a counter */
 #campus-stores .shift {
-  background: var(--memo);
-  color: var(--memotxt);
-  padding: 12px 19px;
-  justify-content: space-between;
+  background: #141413;
+  color: #f6f4ee;
   border-block: 1px solid var(--line);
+  padding: 13px 20px;
+  justify-content: space-between;
 }
 #campus-stores .shift div {
-  max-width: 67ch;
+  max-width: 70ch;
 }
 #campus-stores .shift b {
-  font-size: 13px;
+  font: 600 11px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--yellow);
+}
+#campus-stores .shift p {
+  margin-top: 3px;
 }
 #campus-stores .shift button {
-  background: transparent;
-  border-color: var(--memotxt);
-  color: var(--memotxt);
+  background: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--onyellow);
   flex-shrink: 0;
 }
+
+/* Carried-over strip: the handover, always visible */
+#campus-stores .carry {
+  border-bottom: 2px solid var(--ink);
+  background: var(--card);
+}
+#campus-stores .carry.handover {
+  background: var(--yellow);
+  color: var(--onyellow);
+}
+#campus-stores .carry.handover::before {
+  content: "";
+  display: block;
+  height: 7px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--onyellow) 0 9px,
+    var(--yellow) 9px 18px
+  );
+}
+#campus-stores .carryhead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 20px 2px;
+}
+#campus-stores .carryhead b {
+  font: 800 15px/1.2 var(--cond);
+  font-stretch: 72%;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+#campus-stores .carry.handover small {
+  color: inherit;
+  opacity: 0.75;
+}
+#campus-stores .carry ul {
+  list-style: none;
+  padding: 4px 20px 12px;
+  display: grid;
+}
+#campus-stores .carry li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 0;
+  border-top: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+}
+#campus-stores .carry li:first-child {
+  border-top: 0;
+}
+#campus-stores .carry.handover :is(.atag, button) {
+  border-color: var(--onyellow);
+  color: var(--onyellow);
+  background: transparent;
+}
+#campus-stores .carry.handover .st {
+  background: var(--onyellow);
+  color: var(--yellow);
+}
+
+/* Controls */
 #campus-stores button,
 #campus-stores select,
 #campus-stores input,
 #campus-stores textarea {
   font: inherit;
   color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  background: var(--card);
   min-width: 0;
-  padding: 7px 9px;
+  padding: 7px 10px;
 }
 #campus-stores button {
-  font-size: 13px;
-  font-weight: 600;
+  font: 700 13px/1.2 var(--cond);
+  font-stretch: 82%;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   cursor: pointer;
+  transition: transform 80ms ease;
 }
 #campus-stores button:hover {
-  border-color: var(--sel);
+  background: var(--paper);
 }
-#campus-stores .primary {
-  background: var(--sel);
-  color: var(--inv);
-  border-color: var(--sel);
+#campus-stores button:active {
+  transform: translateY(1px);
+}
+#campus-stores .primary,
+#campus-stores .primary:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+#campus-stores .shift button:hover {
+  background: var(--yellow);
 }
 #campus-stores :is(button, input, textarea, select, summary):focus-visible {
-  outline: 3px solid var(--mark);
+  outline: 3px solid var(--yellow);
   outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--ink);
 }
+
+/* Shell */
 #campus-stores .shell {
   display: grid;
-  grid-template-columns: 155px minmax(0, 1fr);
-  min-height: 315px;
+  grid-template-columns: 168px minmax(0, 1fr);
+  min-height: 360px;
 }
 #campus-stores nav {
-  background: var(--nav);
   border-right: 1px solid var(--line);
-  padding: 12px 8px;
+  padding: 14px 10px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -208,15 +777,18 @@ body > main {
 #campus-stores nav button {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   text-align: left;
-  border: 1px solid transparent;
+  border-color: transparent;
   background: transparent;
-  font-weight: 500;
+  font-size: 14px;
+}
+#campus-stores nav button:hover {
+  border-color: var(--line);
 }
 #campus-stores nav button[aria-pressed="true"] {
-  background: var(--sel);
-  color: var(--inv);
+  background: var(--ink);
+  color: var(--paper);
 }
 #campus-stores nav svg {
   width: 16px;
@@ -224,7 +796,7 @@ body > main {
   flex-shrink: 0;
 }
 #campus-stores .page {
-  padding: 17px 17px 20px;
+  padding: 20px 22px 24px;
   min-width: 0;
 }
 #campus-stores .sectionhead,
@@ -233,63 +805,254 @@ body > main {
   flex-wrap: wrap;
 }
 #campus-stores .sectionhead {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 #campus-stores .sectionhead small {
-  margin-top: 2px;
+  margin-top: 5px;
   display: block;
 }
+
+/* Asset tag: mirrors the label on the physical unit */
+#campus-stores .atag {
+  display: inline-grid;
+  justify-items: start;
+  gap: 2px;
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  padding: 3px 7px;
+  font: 600 13px/1.1 var(--mono);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  min-width: 64px;
+}
+#campus-stores .atag.big {
+  padding: 5px 8px 4px;
+  width: 92px;
+}
+#campus-stores .atag .bars {
+  width: 100%;
+  height: 11px;
+  fill: currentColor;
+}
+#campus-stores .atag.empty {
+  border-style: dashed;
+  color: var(--quiet);
+  border-color: var(--quiet);
+}
+
+/* Status chips */
+#campus-stores .st {
+  display: inline-block;
+  font: 600 11px/1.3 var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 7px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  color: var(--ink);
+  white-space: nowrap;
+}
+#campus-stores .st.ok {
+  background: var(--okbg);
+  color: var(--ok);
+}
+#campus-stores .st.bad {
+  background: var(--badbg);
+  color: var(--bad);
+}
+#campus-stores .st.warn {
+  background: var(--yellow);
+  color: var(--onyellow);
+}
+
+/* Kit cards */
+#campus-stores .kit {
+  position: relative;
+  background: var(--card);
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  margin-bottom: 14px;
+}
+#campus-stores .kit header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--line);
+}
+#campus-stores .kit header small {
+  font-family: var(--mono);
+  font-size: 11px;
+}
+#campus-stores .kit h3 {
+  font: 800 20px/1.15 var(--cond);
+  font-stretch: 75%;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+#campus-stores .kit h3 span {
+  font-weight: 500;
+  color: var(--quiet);
+}
+#campus-stores .kitdue {
+  display: grid;
+  text-align: right;
+  flex-shrink: 0;
+}
+#campus-stores .kitdue b {
+  font: 600 13px var(--mono);
+}
+#campus-stores .auth {
+  margin: 10px 14px 0;
+  padding: 7px 10px;
+  border-left: 3px solid var(--yellow);
+  background: color-mix(in srgb, var(--yellow) 14%, transparent);
+  font-size: 13px;
+}
+#campus-stores .lines {
+  list-style: none;
+  padding: 4px 14px;
+}
+#campus-stores .lines li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px dashed var(--line);
+}
+#campus-stores .lines li:first-child {
+  border-top: 0;
+}
+#campus-stores :is(.lines, .carry) li > span:not([class]) {
+  display: grid;
+  min-width: 0;
+}
+#campus-stores .kitactions {
+  padding: 4px 14px 14px;
+  flex-wrap: wrap;
+}
+#campus-stores .kit.done {
+  border-color: var(--line);
+}
+#campus-stores .kit.done .lines {
+  opacity: 0.7;
+}
+#campus-stores .stamp {
+  position: absolute;
+  right: 120px;
+  top: 14px;
+  transform: rotate(-7deg);
+  border: 2.5px solid var(--ok);
+  color: var(--ok);
+  font: 800 18px/1 var(--cond);
+  font-stretch: 70%;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 5px 9px 4px;
+  border-radius: 3px;
+  pointer-events: none;
+}
+#campus-stores .kitform {
+  border-top: 1.5px solid var(--ink);
+  background: var(--paper);
+  padding: 12px 14px 0;
+}
+#campus-stores .kitform .kitactions {
+  padding: 4px 0 14px;
+}
+#campus-stores .hint {
+  font: 12px/1.5 var(--mono);
+  color: var(--quiet);
+  margin-top: -4px;
+}
+#campus-stores fieldset {
+  border: 1px dashed var(--line);
+  border-radius: 2px;
+  padding: 8px 10px 0;
+}
+#campus-stores legend {
+  font: 600 11px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0 4px;
+}
+#campus-stores .kitform input[name="tags"] {
+  font: 600 16px var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+#campus-stores .formerr {
+  border: 1.5px solid var(--bad);
+  background: var(--badbg);
+  color: var(--bad);
+  font-weight: 600;
+  padding: 8px 10px;
+  border-radius: 2px;
+  margin-bottom: 10px;
+}
+
+/* Rows (inventory, register) */
 #campus-stores .row {
   border-top: 1px solid var(--line);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
-  padding: 9px 0;
+  gap: 10px;
+  padding: 10px 0;
 }
-#campus-stores .row small,
+#campus-stores .rowmain {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: center;
+}
+#campus-stores .rowmain .atag {
+  grid-row: span 2;
+}
+#campus-stores .rowmain small,
 #campus-stores label span {
   display: block;
 }
-#campus-stores .tag {
-  background: var(--desk);
-  color: var(--quiet);
-  font-size: 12px;
-  padding: 3px 7px;
-  border-radius: 5px;
-  display: inline-block;
-}
-#campus-stores .good {
-  background: var(--ok);
-  color: var(--oktxt);
-}
+
+/* Desk book */
 #campus-stores .record {
-  margin-top: 14px;
-  padding: 12px 13px;
-  background: var(--desk);
-  border-left: 3px solid var(--sel);
+  margin-top: 12px;
+  padding: 11px 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--ink);
+}
+#campus-stores .record.auto {
+  border-left-color: var(--yellow);
+}
+#campus-stores .record small {
+  font-family: var(--mono);
+  font-size: 11px;
 }
 #campus-stores .record p {
-  margin-top: 5px;
+  margin-top: 4px;
 }
+
 #campus-stores .buttons {
   flex-wrap: wrap;
-  margin: 10px 0;
+  margin: 0 0 12px;
 }
 #campus-stores .buttons button[aria-pressed="true"] {
-  background: var(--sel);
-  color: var(--inv);
+  background: var(--ink);
+  color: var(--paper);
 }
 #campus-stores .buttons label {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 }
 #campus-stores .form {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin: 10px 0;
+  gap: 12px;
+  margin: 0 0 12px;
 }
 #campus-stores .form label {
   font-size: 13px;
@@ -297,7 +1060,7 @@ body > main {
   min-width: 0;
 }
 #campus-stores .form label span {
-  margin-bottom: 3px;
+  margin-bottom: 4px;
 }
 #campus-stores .form :is(select, input, textarea) {
   width: 100%;
@@ -310,11 +1073,9 @@ body > main {
   resize: vertical;
 }
 #campus-stores .statusbar {
-  background: var(--desk);
-  border-top: 1px solid var(--line);
-  padding: 8px 16px;
-  color: var(--quiet);
-  font-size: 12px;
+  border-top: 2px solid var(--ink);
+  padding: 9px 20px;
+  font: 12px/1.5 var(--mono);
 }
 #campus-stores .statusbar span {
   flex: 1 1 160px;
@@ -323,7 +1084,8 @@ body > main {
   font-size: 12px;
   background: transparent;
 }
-@container (max-width:650px) {
+
+@container (max-width: 650px) {
   #campus-stores .shell {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -332,40 +1094,63 @@ body > main {
     border-bottom: 1px solid var(--line);
     flex-direction: row;
     flex-wrap: wrap;
-    padding: 7px;
+    padding: 8px 10px;
   }
   #campus-stores nav button {
-    gap: 4px;
-    padding: 5px 7px;
+    gap: 5px;
+    padding: 6px 8px;
   }
   #campus-stores .shift {
     flex-wrap: wrap;
   }
   #campus-stores .page {
-    padding: 14px 12px;
+    padding: 16px 12px;
   }
-  #campus-stores .mast {
-    padding: 12px;
+  #campus-stores :is(.mast, .examstrip, .shift, .carryhead, .statusbar) {
+    padding-inline: 12px;
   }
-  #campus-stores .examstrip,
-  #campus-stores .shift {
-    padding: 9px 12px;
+  #campus-stores .carry ul {
+    padding-inline: 12px;
+  }
+  #campus-stores .carry li {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  #campus-stores .lines li {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  #campus-stores .lines li > .st {
+    grid-column: 2;
+    justify-self: start;
+  }
+  #campus-stores .stamp {
+    position: static;
+    align-self: center;
+    flex-shrink: 0;
   }
 }
-@container (max-width:420px) {
+@container (max-width: 420px) {
   #campus-stores .form {
     grid-template-columns: minmax(0, 1fr);
   }
   #campus-stores .brandmark {
     display: none;
   }
-  #campus-stores .row {
-    gap: 5px;
+  #campus-stores .kit header {
+    flex-wrap: wrap;
+  }
+  #campus-stores .kitdue {
+    text-align: left;
   }
 }
 @media (pointer: coarse) {
   #campus-stores button,
-  #campus-stores select {
+  #campus-stores select,
+  #campus-stores input {
     min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #campus-stores button {
+    transition: none;
   }
 }

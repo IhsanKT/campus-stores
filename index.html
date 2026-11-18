@@ -8,7 +8,27 @@
       name="description"
       content="Work a shift at a fictional campus equipment desk in this interactive product engineering exercise."
     />
+    <link rel="icon" href="data:," />
+    <link
+      rel="preload"
+      href="./fonts/archivo-wdth-wght.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link rel="stylesheet" href="./styles.css" />
+    <script>
+      // Apply a saved theme before first paint; "auto" follows the device setting.
+      try {
+        const t = localStorage.getItem("campus-stores.theme");
+        if (t === "light" || t === "dark")
+          document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+    <script defer src="./handover.js"></script>
+    <script defer src="./extract.js"></script>
+    <script defer src="./ask.js"></script>
+    <script defer src="./eval/cases.js"></script>
     <script defer src="./app.js"></script>
   </head>
   <body>
@@ -63,11 +83,26 @@
           d="M20 9a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"
         />
       </symbol>
+      <symbol id="icon-flask-conical" viewBox="0 0 24 24">
+        <path
+          d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"
+        />
+        <path d="M6.453 15h11.094" />
+        <path d="M8.5 2h7" />
+      </symbol>
     </svg>
     <main>
       <div id="campus-stores">
         <div class="examstrip">
           <span>Product Engineer practical</span>
+          <button type="button" class="tourbtn" data-action="tour">
+            Take the 2-minute tour
+          </button>
+          <div class="theme" role="group" aria-label="Colour theme">
+            <button type="button" data-action="theme" data-val="auto">Auto</button
+            ><button type="button" data-action="theme" data-val="light">Light</button
+            ><button type="button" data-action="theme" data-val="dark">Dark</button>
+          </div>
           <details>
             <summary>Candidate brief</summary>
             <div class="briefcopy">
@@ -104,9 +139,24 @@
             </div>
             <div>
               <h1>Campus Stores</h1>
-              <div class="muted">Media equipment desk</div>
+              <div class="muted">Media equipment desk · Counter 1</div>
             </div>
           </div>
+          <section class="ask" aria-label="Ask the desk">
+            <form data-askform>
+              <label for="askq">Ask the desk</label>
+              <div class="askrow">
+                <input
+                  id="askq"
+                  name="q"
+                  autocomplete="off"
+                  placeholder="Where is the adapter?"
+                /><button type="submit" class="primary">Ask</button>
+              </div>
+            </form>
+            <div class="askchips" data-askchips></div>
+            <div data-answer aria-live="polite"></div>
+          </section>
           <div class="clock">
             <small>Desk time</small><strong data-clock></strong>
           </div>
@@ -118,6 +168,12 @@
           </div>
           <button type="button" data-action="advance"></button>
         </aside>
+        <section
+          class="carry"
+          data-carry
+          aria-label="Units not back at the desk"
+          hidden
+        ></section>
         <div class="shell">
           <nav aria-label="Store records" data-nav></nav>
           <section
@@ -126,6 +182,7 @@
             aria-label="Selected register"
           ></section>
         </div>
+        <aside class="tour" data-tour aria-live="polite" hidden></aside>
         <div class="statusbar">
           <span role="status" aria-live="polite" data-status></span
           ><button type="button" data-action="restart">
