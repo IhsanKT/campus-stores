@@ -239,6 +239,17 @@ body {
   color: var(--onyellow);
   border-color: var(--yellow);
 }
+/* The popup is always dark, so its hover states can't use the page's theme colours. */
+#campus-stores .tour button:hover {
+  background: #f6f4ee;
+  color: #141413;
+  border-color: #f6f4ee;
+}
+#campus-stores .tour .primary:hover {
+  background: #ffd456;
+  color: #141413;
+  border-color: #ffd456;
+}
 #campus-stores .spot {
   outline: 3px solid var(--yellow);
   outline-offset: 4px;
