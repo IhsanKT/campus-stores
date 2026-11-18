@@ -4,6 +4,8 @@ Campus Stores is a Product Engineer work sample set at a fictional campus media 
 
 ---
 
+> **Live app: [ihsankt.github.io/campus-stores](https://ihsankt.github.io/campus-stores/)**
+>
 > **Reviewers, start here:** open the app and press **Take the 2-minute tour** at the top. It drives the real app through the six moments below: issuing the kit, the AI reading Kabir's message, the checked handover, *Ask the desk*, the wrong adapter being stopped, and the live Evaluation tab. No key, install or download is needed.
 >
 > ![Guided tour](docs/screenshots/after-18-guided-tour.png)
