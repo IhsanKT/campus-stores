@@ -140,6 +140,16 @@ This shift is a small version of a **clinical handover**: something moves from o
 
 The visual language comes from the **physical asset label** the clerk compares against: monospace tag IDs with a barcode, condensed industrial type, black and off-white "label stock", and **one safety-yellow accent used only for attention**. That means the carried-over bar, promises and focus outlines. Red means overdue and green means returned, and nothing is decorative. Fonts (Archivo, IBM Plex Mono) are bundled in the repo so the app still runs offline. It runs full-screen like a desk tool rather than a widget on a page. An Auto / Light / Dark switch is included, with Auto following the device setting, and the layout works on phones.
 
+### Moving an existing desk onto it: CSV import
+
+**Inventory → Import from CSV** takes the spreadsheet a desk already keeps, and **Download inventory (CSV)** gives the same format back. Bad rows quietly corrupting the records is the real risk, so the import always shows a preview and changes nothing until you confirm.
+
+- **It understands messy sheets.** Headers like "Asset Tag", "Item" or "Shelf" are matched, `pr07` is read as `PR-07`, and "Projector (HDMI)" as *HDMI projector*. Every reading is shown.
+- **Rows are checked before import.** A bad tag, a duplicate in the file, changing the type of a unit that's on loan, or marking a loaned unit as in repair skips that row with the reason. New types and missing bins are flagged as warnings.
+- **Only the rows that pass are imported.** Imported units appear in kits straight away and survive a reload.
+
+![CSV import preview](docs/screenshots/after-19-csv-import-preview.png)
+
 ### Not built (deliberately)
 
 To keep the change small and testable I left out: undo, barcode or camera scanning (typing the tag stands in for it), editing a promise after it's been set, and reissuing a returned unit on the same request.

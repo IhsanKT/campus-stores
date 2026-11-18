@@ -120,6 +120,7 @@
       },
     ],
     notes: [],
+    inv: [], // units added or changed by CSV import
     notice: "Sample shift · All records are fictional.",
   });
   let s = original();
@@ -165,6 +166,8 @@
     "</small></div><div class=\"rowside\">" +
     right +
     "</div></div>";
+  const statBox = (n, label, kind) =>
+    '<div class="stat ' + kind + '"><b>' + esc(n) + "</b><small>" + esc(label) + "</small></div>";
   const badge = (t, kind = "") =>
     '<span class="st ' + kind + '">' + esc(t) + "</span>";
   // Decorative barcode derived from the tag, echoing the label on the physical unit.
@@ -471,10 +474,157 @@
       requests.map(kitCard).join("")
     );
   }
+  // --- Inventory CSV import: preview every row, import only the rows that pass ---
+  const baseAssets = assets.map((a) => ({ ...a }));
+  function applyInv(list) {
+    const m = baseAssets.map((a) => ({ ...a }));
+    for (const x of list || []) {
+      const i = m.findIndex((a) => a.id === x.id);
+      if (i >= 0) m[i] = { ...m[i], ...x };
+      else m.push({ ...x });
+    }
+    assets.splice(0, assets.length, ...m);
+  }
+  function parseCSV(text) {
+    const rows = [];
+    let row = [],
+      f = "",
+      inQ = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQ) {
+        if (c === '"' && text[i + 1] === '"') (f += '"'), i++;
+        else if (c === '"') inQ = false;
+        else f += c;
+      } else if (c === '"') inQ = true;
+      else if (c === ",") row.push(f), (f = "");
+      else if (c === "\n" || c === "\r") {
+        if (c === "\r" && text[i + 1] === "\n") i++;
+        row.push(f), rows.push(row), (row = []), (f = "");
+      } else f += c;
+    }
+    if (f || row.length) row.push(f), rows.push(row);
+    return rows.filter((r) => r.some((x) => x.trim()));
+  }
+  const COLS = [
+    ["tag", /tag|^id$|asset|code|serial/i],
+    ["type", /type|item|category|kind|equipment/i],
+    ["model", /model|make|brand|name|desc/i],
+    ["bin", /bin|shelf|location|place|rack/i],
+    ["repair", /repair|status|condition|broken/i],
+  ];
+  const TYPE_WORDS = [
+    ["HDMI projector", /projector/i],
+    ["Portable speaker", /speaker/i],
+    ["USB-C → HDMI adapter", /adapter|adaptor|dongle/i],
+    ["Wireless microphone", /\bmic|microphone/i],
+    ["Digital camera", /camera/i],
+  ];
+  let imp = null; // import preview, not persisted
+  function analyseCSV(text, file) {
+    const [header = [], ...body] = parseCSV(text.replace(/^﻿/, ""));
+    const map = {},
+      matched = [];
+    header.forEach((h, i) => {
+      const hit = COLS.find(([k, re]) => !(k in map) && re.test(h.trim()));
+      if (hit) map[hit[0]] = i, matched.push(hit[0] + " ← “" + h.trim() + "”");
+    });
+    if (!("tag" in map) || !("type" in map))
+      return { file, fatal: "Couldn’t find a tag column and a type column in the header row (“" + header.join(", ") + "”).", rows: [] };
+    const known = [...new Set(assets.map((a) => a.type))];
+    const seen = {};
+    const rows = body.map((r, n) => {
+      const line = n + 2;
+      const cell = (k) => (k in map ? String(r[map[k]] || "").trim() : "");
+      const notes = [];
+      const raw = cell("tag");
+      const tm = /^([A-Za-z]{2})\s*-?\s*(\d{2})$/.exec(raw);
+      const id = tm ? tm[1].toUpperCase() + "-" + tm[2] : "";
+      let type = cell("type");
+      const exact = known.find((t) => t.toLowerCase() === type.toLowerCase());
+      const fuzzy = !exact && TYPE_WORDS.find(([, re]) => re.test(type));
+      if (exact) type = exact;
+      else if (fuzzy) notes.push("type “" + type + "” read as " + fuzzy[0]), (type = fuzzy[0]);
+      else if (type) notes.push("new type “" + type + "”: no request asks for it yet");
+      const repair = /yes|^y$|true|^1$|repair|broken|workshop|faulty/i.test(cell("repair"));
+      let bin = cell("bin") || (repair ? "Workshop" : "");
+      if (!bin) (bin = "Unassigned"), notes.push("no bin given");
+      const model = cell("model") || "Unknown model";
+      const fail = (why) => ({ line, raw, id, status: "error", notes: [why] });
+      if (!id) return fail("“" + raw + "” isn’t a tag like AD-12");
+      if (raw !== id) notes.unshift("tag “" + raw + "” read as " + id);
+      if (!type) return fail(id + " has no type");
+      if (seen[id]) return fail(id + " is already on line " + seen[id] + " of this file");
+      seen[id] = line;
+      const cur = getAsset(id);
+      const loan = out(id);
+      if (cur && loan && cur.type !== type) return fail(id + " is on loan; its type can’t change until it’s back");
+      if (loan && repair) return fail(id + " is on loan with " + loan.holder + "; mark it in repair after it’s back");
+      const asset = { id, type, model, bin, repair };
+      if (cur && cur.type === type && cur.model === model && cur.bin === bin && !!cur.repair === repair)
+        return { line, raw, id, status: "same", notes: ["already up to date"], asset };
+      return { line, raw, id, status: cur ? "update" : "new", notes, asset };
+    });
+    return { file, matched, rows };
+  }
+  function importPanel() {
+    if (!imp) return "";
+    let h = '<section class="evalcard importer"><h3>Import preview · ' + esc(imp.file) + "</h3>";
+    if (imp.fatal) return h + '<p class="formerr">' + esc(imp.fatal) + "</p>" + btn("Close", "csvcancel") + "</section>";
+    const n = (st) => imp.rows.filter((r) => r.status === st).length;
+    const ok = imp.rows.filter((r) => r.status === "new" || r.status === "update");
+    h +=
+      '<p class="hint">Columns matched: ' +
+      esc(imp.matched.join(" · ")) +
+      ". Nothing changes until you press Import.</p>" +
+      '<div class="stats">' +
+      statBox(n("new"), "new units", "ok") +
+      statBox(n("update"), "updates", "warn") +
+      statBox(n("error"), "rows skipped", n("error") ? "bad" : "ok") +
+      '</div><ul class="evalrows">' +
+      imp.rows
+        .map(
+          (r) =>
+            '<li><span class="st ' +
+            ({ new: "ok", update: "warn", error: "bad", same: "" })[r.status] +
+            '">' +
+            esc(r.status === "same" ? "no change" : r.status) +
+            "</span><span><b>Line " +
+            r.line +
+            " · " +
+            esc(r.id || r.raw || "(blank)") +
+            "</b>" +
+            (r.asset ? " " + esc(r.asset.type + " · " + r.asset.model + " · bin " + r.asset.bin + (r.asset.repair ? " · in repair" : "")) : "") +
+            r.notes.map((x) => "<small>" + esc(x) + "</small>").join("") +
+            "</span></li>",
+        )
+        .join("") +
+      '</ul><div class="kitactions">' +
+      (ok.length ? btn("Import " + ok.length + (ok.length === 1 ? " row" : " rows"), "csvapply", "", "primary") : "") +
+      btn("Cancel", "csvcancel") +
+      "</div></section>";
+    return h;
+  }
+  function downloadCSV() {
+    const q2 = (v) => (/[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v);
+    const lines = [["tag", "type", "model", "bin", "in_repair"].join(",")].concat(
+      assets.map((a) => [a.id, a.type, a.model, a.bin, a.repair ? "yes" : "no"].map(q2).join(",")),
+    );
+    const url = URL.createObjectURL(new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "campus-stores-inventory.csv";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
   function inventory() {
     let html = head("Inventory", "Physical units · home shelf and current availability");
+    html += importPanel();
     html +=
-      '<div class="buttons"><label>Show <select data-filter>' +
+      '<div class="buttons"><label class="filebtn">Import from CSV<input type="file" accept=".csv,text/csv" data-csv class="vh" /></label>' +
+      btn("Download inventory (CSV)", "csvout") +
+      '<label>Show <select data-filter>' +
       ["All items", "On shelf", "On loan", "In repair"]
         .map((f) => '<option value="' + f + '">' + f + "</option>")
         .join("") +
@@ -748,7 +898,7 @@
       text: "Six stops through one shift, about two minutes. Each stop uses the real app, so you can stop and try it at any point.",
       target: ".mast",
       run() {
-        s = original();
+        s = { ...original(), inv: s.inv || [] }; // keep any imported inventory
         askQ = "";
         ho = null;
       },
@@ -875,8 +1025,7 @@
   function evaluation() {
     const r = EvalCases.runReader(Extract);
     const c = EvalCases.runChecker(Handover);
-    const stat = (n, label, kind) =>
-      '<div class="stat ' + kind + '"><b>' + esc(n) + "</b><small>" + esc(label) + "</small></div>";
+    const stat = statBox;
     let h = head("Evaluation", "Runs live in your browser every time this page opens · same cases as node eval/run.js");
     h +=
       '<section class="evalcard"><h3>Message reader</h3><p class="hint">' +
@@ -950,6 +1099,7 @@
     Evaluation: evaluation,
   };
   function paint() {
+    applyInv(s.inv);
     const phase = shifts[s.phase];
     q("[data-clock]").textContent = phase.time;
     q("[data-shift-title]").textContent = phase.title;
@@ -1012,6 +1162,20 @@
       const next = { tour: 0, tournext: tourAt + 1, tourprev: tourAt - 1, tourend: -1 }[act];
       tourGo(next >= tour.length ? -1 : next);
       if (next >= tour.length) commit("Tour finished. Restart sample shift to try the job yourself.");
+      return;
+    }
+    if (act === "csvout") return downloadCSV();
+    if (act === "csvcancel" || act === "csvapply") {
+      if (act === "csvapply" && imp) {
+        const ok = imp.rows.filter((r) => r.status === "new" || r.status === "update");
+        s.inv = (s.inv || []).filter((x) => !ok.some((r) => r.id === x.id)).concat(ok.map((r) => r.asset));
+        const added = ok.filter((r) => r.status === "new").length;
+        s.notice =
+          "Imported " + added + " new " + (added === 1 ? "unit" : "units") + " and updated " + (ok.length - added) + ". " +
+          imp.rows.filter((r) => r.status === "error").length + " rows skipped.";
+      }
+      imp = null;
+      commit();
       return;
     }
     if (act === "ask" || act === "askclose") {
@@ -1108,6 +1272,15 @@
     q("form[data-handover] [type=submit]").disabled = issues().some((i) => i.level === "error");
   });
   root.addEventListener("change", (e) => {
+    if (e.target.matches("[data-csv]")) {
+      const file = e.target.files[0];
+      if (!file) return;
+      file.text().then((t) => {
+        imp = analyseCSV(t, file.name);
+        paint();
+      });
+      return;
+    }
     if (e.target.matches("[data-filter]")) {
       s.filter = e.target.value;
       commit();
@@ -1234,6 +1407,9 @@
     commit(r.id + " · " + parts.join(" ") + " Logged in the desk book.");
   });
   function restore(d) {
+    if (!d) return;
+    d.inv = Array.isArray(d.inv) ? d.inv.filter((a) => a && /^[A-Z]{2}-\d{2}$/.test(a.id) && a.type) : [];
+    applyInv(d.inv); // imported units must exist before loans that use them are checked
     if (
       !d ||
       d.version !== 2 ||
